@@ -2,8 +2,10 @@
 // Created by Jose on 2/16/2016.
 //
 #include <iostream>
+#include <string>
 #include <sstream>
 #include <cmath>
+#include <algorithm>
 #include "Point.h"
 
 using namespace std;
@@ -15,7 +17,7 @@ namespace Clustering {
         Point::Point(int pass){
                 __id =  __idGen;        //Gives an ID to the class
 
-                __idGen++;              //Increments ID so it can be different everytime
+                ++__idGen;              //Increments ID so it can be different everytime
 
                 __dim = pass;           //Assigns the current dimention
 
@@ -23,14 +25,15 @@ namespace Clustering {
 
                 for(int i = 0; i < __dim; i++)   //Gives every value in the array a value of 0.0
                         __values[i] = 0.0;
-
         }
 
+    // ******************************************************************
+
         //constructor
-        Point::Point(int pass, double * thing){
+        Point::Point(int pass, double *thing){
                 __id =  __idGen;        //Gives an ID to the class
 
-                __idGen++;              //Increments ID so it can be different everytime
+                ++__idGen;              //Increments ID so it can be different everytime
 
                 __dim = pass;           //Assigns the current dimention
 
@@ -40,6 +43,8 @@ namespace Clustering {
                         __values[i] = thing[i];
 
         }
+
+    // ******************************************************************
 
         //copy constructor
         Point::Point(const Point &pass){
@@ -53,6 +58,8 @@ namespace Clustering {
                          __values[i] = pass.__values[i];
 
         }
+
+    // ******************************************************************
 
         //overloaded operator=
         Point &Point::operator=(const Point &point){
@@ -72,27 +79,41 @@ namespace Clustering {
                 return *this;
         }
 
+    // ******************************************************************
+
         //destructor
         Point::~Point(){
                 delete []__values;      //deletes values[]
         }
+
+    // ******************************************************************
 
         // Accessors & mutators
         int Point::getId() const{
                 return __id;
         }
 
+    // ******************************************************************
+
         int Point::getDims() const{
                 return __dim;
         }
 
+    // ******************************************************************
+
         void Point::setValue(int i, double pass){
+             if(i >= 0 && i < __dim)
                 __values[i] = pass;
         }
 
+    // ******************************************************************
+
         double Point::getValue(int i) const{
+            if(i >= 0 && i < __dim)
                 return __values[i];
         }
+
+    // ******************************************************************
 
         // Functions
         double Point::distanceTo(const Point &pass) const{
@@ -109,17 +130,19 @@ namespace Clustering {
 
         }
 
+    // ******************************************************************
+
         // Overloaded operators
 
         // Members
-
-        // p *= 6; p.operator*=(6);
         Point &Point::operator*=(double pass){
                 for(int i = 0; i < __dim; i++)
                         __values[i] *= pass;
 
                 return *this;
         }
+
+    // ******************************************************************
 
         Point &Point::operator/=(double pass){
                 for(int i = 0; i < __dim; i++)
@@ -128,29 +151,41 @@ namespace Clustering {
                 return *this;
         }
 
+    // ******************************************************************
+
         // prevent (p1 * 2) = p2;
         const Point Point::operator*(double pass) const{
-                Point temp(__dim);
+                Point temp(*this);
 
-                for(int i = 0; i < __dim; i++)
-                        temp.__values[i] = __values[i] * pass;
+                temp *= pass;
+
+//                for(int i = 0; i < __dim; i++)
+//                        temp.__values[i] = __values[i] * pass;
 
                 return temp;
         }
+
+    // ******************************************************************
 
         // p3 = p2 / 2;
         const Point Point::operator/(double pass) const{
-                Point temp(__dim);
+                Point temp(*this);
 
-                for(int i = 0; i < __dim; i++)
-                        temp.__values[i] = __values[i] / pass;
+                temp /= pass;
+
+//                for(int i = 0; i < __dim; i++)
+//                        temp.__values[i] = __values[i] / pass;
 
                 return temp;
         }
+
+    // ******************************************************************
 
         double &Point::operator[](int index){
                 return this -> __values[index];
         }
+
+    // ******************************************************************
 
         // Friends
 
@@ -161,12 +196,16 @@ namespace Clustering {
                 return left;
         }
 
+    // ******************************************************************
+
         Point &operator-=(Point &left, const Point &right){
                 for(int i = 0; i < left.__dim; i++)
                         left.__values[i] = left.__values[i] - right.__values[i];
 
                 return left;
         }
+
+    // ******************************************************************
 
         const Point operator+(const Point &left, const Point &right){
                 Point temp(left.__dim);
@@ -177,6 +216,8 @@ namespace Clustering {
                 return temp;
         }
 
+    // ******************************************************************
+
         const Point operator-(const Point &left, const Point &right){
                 Point temp(left.__dim);
 
@@ -186,10 +227,12 @@ namespace Clustering {
                 return temp;
         }
 
+    // ******************************************************************
+
         bool operator==(const Point &left, const Point &right){
                 bool temp = true;
 
-                if(left.__dim != right.__dim || left.__id != right.__id)
+                if(left.__id != right.__id)
                         temp = false;
 
                 for(int i = 0; i < left.getDims(); i++){
@@ -199,6 +242,8 @@ namespace Clustering {
 
                 return temp;
         }
+
+    // ******************************************************************
 
 
         bool operator!=(const Point &left, const Point &right){
@@ -215,83 +260,102 @@ namespace Clustering {
                 return temp;
         }
 
+    // ******************************************************************
+
         bool operator<(const Point &left, const Point &right){
-                bool temp = true;
+                int temp = std::max(left.__dim, right.__dim);
 
-                if(left.__dim > right.__dim)
-                        temp = false;
-
-                for(int i = 0; i < left.getDims(); i++){
-                        if(left.__values[i] > right.__values[i])
-                                temp = false;
+                for(int i = 0; i < temp; i++){
+                        if(left.getValue(i) != right.getValue(i))
+                                return (left.getValue(i) < right.getValue(i));
                 }
-
-                return temp;
+                return false;
         }
+
+    // ******************************************************************
 
         bool operator>(const Point &left, const Point &right){
-                bool temp = true;
+                return (right < left);
 
-                if(left.__dim < right.__dim)
-                        temp = false;
-
-                for(int i = 0; i < left.getDims(); i++){
-                        if(left.__values[i] < right.__values[i])
-                                temp = false;
-                }
-
-                return temp;
+//                bool temp = true;
+//
+//                if(left.__dim < right.__dim)
+//                        temp = false;
+//
+//                for(int i = 0; i < left.getDims(); i++){
+//                        if(left.__values[i] < right.__values[i])
+//                                temp = false;
+//                }
+//
+//                return temp;
         }
+
+    // ******************************************************************
 
         bool operator<=(const Point &left, const Point &right){
-                bool temp = true;
+                return !(left > right);
 
-                if(left > right)
-                        temp = false;
-
-                return temp;
+//                bool temp = true;
+//
+//                if(left > right)
+//                        temp = false;
+//
+//                return temp;
         }
+
+    // ******************************************************************
 
         bool operator>=(const Point &left, const Point &right){
-                bool temp = true;
+                return !(left < right);
 
-                if(left < right)
-                        temp = false;
-
-                return temp;
+//                bool temp = true;
+//
+//                if(left < right)
+//                        temp = false;
+//
+//                return temp;
         }
+
+    // ******************************************************************
 
 
         ostream &operator<<(ostream &output, const Point &pass){
-                for(int i = 0; i < pass.getDims(); i++){
-                        output << pass.getValue(i);
+                int i = 0;
 
-                        if(i != pass.getDims() -1)
-                                output << ", ";
-                }
+                for(; i < pass.getDims() - 1; i++)
+                        output << pass.getValue(i) << ", ";
 
-                return output;
+                output << pass.__values[i];
         }
+
+    // ******************************************************************
 
         istream &operator>>(istream &input, Point &pass){
                 int i = 0;
                 string s1,s2;
 
-                while(!input.eof()){
-                        getline(input, s1);
 
-                        stringstream ss1(s1);
+                getline(input, s1);
 
-                        while(!ss1.eof()){
-                                getline(ss1,s2, ',');
+                int size = count(s1.begin(), s1.end(), ',') +1;
 
-                                stringstream ss2(s2);
+                stringstream ss(s1);
 
-                                ss2 >> pass.__values[i];
+                if(pass.getDims() != size){
+                    delete [] pass.__values;
 
-                                ++i;
-                        }
+                    pass.__dim = size;
+                    pass.__values = new double [pass.__dim];
+                }
 
+                while(!ss.eof()){
+                        getline(ss,s2, ',');
+
+                        stringstream ss2(s2);
+
+                        ss2 >> pass.__values[i];
+
+                        ++i;
                 }
 
                 return input;

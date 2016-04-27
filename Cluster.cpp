@@ -1,6 +1,5 @@
-////
-//// Created by Jose on 2/16/2016.
-////
+//
+// Created by Jose on 2/16/2016.
 //
 
 #include <algorithm>
@@ -9,9 +8,7 @@
 #include "Cluster.h"
 
 namespace Clustering {
-    LNode::LNode(const Point &p, LNodePtr n) : point(p) {
-        next = n;
-    }
+    LNode::LNode(const Point &p, LNodePtr n) : point(p), next(n) { }
 
     // ******************************************************************
 
@@ -389,9 +386,10 @@ namespace Clustering {
 
     // ******************************************************************
 
-    std::ostream &operator<<(std::ostream &output, const Cluster &Clust) {
-        LNodePtr temp = Clust.__points;
-        for (int i = 0; i < Clust.__size; ++i) {
+    std::ostream &operator<<(std::ostream &output, const Cluster &cluster) {
+        LNodePtr temp = cluster.__points;
+
+        for (int i = 0; i < cluster.__size; ++i) {
             output << temp->point << std::endl;
             temp = temp->next;
         }
@@ -401,21 +399,19 @@ namespace Clustering {
     // ******************************************************************
 
     std::istream &operator>>(std::istream &in, Cluster &cluster) {
-        while (!in.eof()) {
-            Point p(1);
+        std::string s;
 
-            std::string str;
-            std::getline(in, str);
+        while (getline(in, s)) {
+            int d = (int) std::count(s.begin(), s.end(), ',');
 
-            if (str.length() > 0) {
-                std::stringstream ss(str);
+            Point p(d+1);
 
-                ss >> p;
+            std::stringstream ss(s);
 
-                cluster.add(p);
-            }
+            ss >> p;
+
+            cluster.add(p);
         }
-
         return in;
     }
 }
